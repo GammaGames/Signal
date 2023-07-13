@@ -21,16 +21,19 @@ This **toybox** contains **Lua** toys for you to play with.
 
 ---
 
-In this example we create a global instance of Signal, subscribe to a key, and notify against that key elsewhere. Notice that all of the values passed to Signal:notify are passed on to the subscribed functions.
-```
--- ... creating a global variable in main ...
-NotificationCenter = Signal()
+Signal creates its event bus on import. In this example we define our callback function, add it, call it a few times, and remove it:
 
--- ... in code that needs to know when score has changed ...
-NotificationCenter:subscribe("game_score", self, function(new_score, score_delta)
-   self:update_score(new_score)
-end)
+```lua
+local score = 0
+local function change_score(_bind, _key, change)
+   score += change
+   print(score)
+end
 
--- ... in code that changes the score ...
-NotificationCenter:notify("game_score", new_score, score_delta)
+-- The second argument is the binding for the callback (first argument), useful for OOP
+Signal:add("score_changed", nil, change_score)
+Signal:dispatch("score_changed", 1)
+Signal:dispatch("score_changed", 2)
+Signal:dispatch("score_changed", -3)
+Signal:remove("score_changed", change_score)
 ```
